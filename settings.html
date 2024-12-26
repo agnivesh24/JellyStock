@@ -1,0 +1,106 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="settings-container animate-fade-in">
+    <div class="container">
+        <div class="settings-header">
+            <h2><i class="fas fa-cog"></i> Settings</h2>
+            <p>Customize your JellyStock experience</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} animate-fade-in">
+                        <i class="fas fa-info-circle"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="settings-grid">
+            <!-- Appearance Settings -->
+            <div class="settings-card">
+                <h3><i class="fas fa-paint-brush"></i> Appearance</h3>
+                <form method="POST" class="settings-form">
+                    <div class="form-group">
+                        <label class="form-label">Theme</label>
+                        <select name="theme" class="form-input">
+                            <option value="light" {% if settings.theme == 'light' %}selected{% endif %}>Light</option>
+                            <option value="dark" {% if settings.theme == 'dark' %}selected{% endif %}>Dark</option>
+                            <option value="auto" {% if settings.theme == 'auto' %}selected{% endif %}>System Default</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Language</label>
+                        <select name="language" class="form-input">
+                            <option value="en" {% if settings.language == 'en' %}selected{% endif %}>English</option>
+                            <option value="es" {% if settings.language == 'es' %}selected{% endif %}>Español</option>
+                            <option value="fr" {% if settings.language == 'fr' %}selected{% endif %}>Français</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Appearance
+                    </button>
+                </form>
+            </div>
+
+            <!-- Notification Settings -->
+            <div class="settings-card">
+                <h3><i class="fas fa-bell"></i> Notifications</h3>
+                <form method="POST" class="settings-form">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" name="notifications" 
+                                   {% if settings.notifications %}checked{% endif %}>
+                            Enable Notifications
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" name="email_alerts"
+                                   {% if settings.email_alerts %}checked{% endif %}>
+                            Email Alerts
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Low Stock Alert Threshold</label>
+                        <input type="number" name="low_stock_alert" 
+                               class="form-input" min="1"
+                               value="{{ settings.low_stock_alert }}">
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Notifications
+                    </button>
+                </form>
+            </div>
+
+            <!-- Security Settings -->
+            <div class="settings-card">
+                <h3><i class="fas fa-lock"></i> Security</h3>
+                <form method="POST" class="settings-form">
+                    <div class="form-group">
+                        <label class="form-label">Current Password</label>
+                        <input type="password" name="current_password" 
+                               class="form-input" placeholder="Enter current password">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">New Password</label>
+                        <input type="password" name="new_password" 
+                               class="form-input" placeholder="Enter new password">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Confirm New Password</label>
+                        <input type="password" name="confirm_password" 
+                               class="form-input" placeholder="Confirm new password">
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Update Password
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

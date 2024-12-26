@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JellyStock - Smart Inventory Management</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/jellystock-icon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    {% extends "base.html" %}
+
+{% block title %}JellyStock - Smart Inventory Management{% endblock %}
+
+{% block content %}
+    <!-- Your index page content here -->
+     <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">
+                <div class="jellystock-logo">
+                    <svg class="jellystock-icon" viewBox="0 0 100 100" width="48" height="48">
+                        <defs>
+                            <linearGradient id="jellyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#0066cc" />
+                                <stop offset="100%" style="stop-color:#0052a3" />
+                            </linearGradient>
+                        </defs>
+                        <path class="jelly-body" d="M 20 40 Q 50 10 80 40 Q 90 60 80 80 Q 50 100 20 80 Q 10 60 20 40" />
+                        <path class="jelly-shine" d="M 30 40 Q 50 20 70 40" stroke-width="4" fill="none" />
+                    </svg>
+                    <span>JellyStock</span>
+                </div>
+            </a>
+            <div class="nav-links">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#benefits" class="nav-link">Benefits</a>
+                <a href="#pricing" class="nav-link">Pricing</a>
+                <a href="#reviews" class="nav-link">Reviews</a>
+            </div>
+            <div class="nav-buttons">
+                <a href="{{ url_for('demo') }}" class="btn btn-primary">Try Demo</a>
+                <a href="#" class="btn btn-outline">Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Add this modal HTML right after your navigation -->
+    <div id="demoModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Inventory Demo</h2>
+            <form id="demoForm">
+                <div class="form-group">
+                    <label for="storeName">Store Name</label>
+                    <input type="text" id="storeName" required>
+                </div>
+                
+                <div id="inventoryList">
+                    <div class="inventory-item">
+                        <select class="item-name" required>
+                            <option value="">Select Item</option>
+                            <option value="Laptop">Laptop</option>
+                            <option value="Smartphone">Smartphone</option>
+                            <option value="Tablet">Tablet</option>
+                            <option value="Headphones">Headphones</option>
+                            <option value="Monitor">Monitor</option>
+                            <option value="Keyboard">Keyboard</option>
+                            <option value="Mouse">Mouse</option>
+                        </select>
+                        <select class="item-type" required>
+                            <option value="">Select Type</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Accessories">Accessories</option>
+                            <option value="Peripherals">Peripherals</option>
+                            <option value="Components">Components</option>
+                        </select>
+                        <input type="number" placeholder="Current stock" required>
+                        <input type="number" placeholder="Price" required>
+                    </div>
+                </div>
+                
+                <button type="button" id="addItem" class="btn btn-secondary">Add Item</button>
+                <button type="submit" class="btn btn-primary">Predict Stock</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+        </div>
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span class="badge-icon">⚡</span>
+                    <span>AI-Powered Inventory Management</span>
+                </div>
+                <h1>Transform Your 
+                    <span class="gradient-text">Inventory</span><br>
+                    Into Intelligence
+                </h1>
+                <p class="hero-description">
+                    Streamline your inventory management with AI predictions, 
+                    real-time tracking, and smart analytics.
+                </p>
+                <div class="hero-cta">
+                    <a href="{{ url_for('register') }}" class="btn btn-primary btn-large">
+                        Get Started Free
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                    <a href="#demo" class="btn btn-outline btn-large">
+                        <i class="fas fa-play-circle"></i>
+                        Watch Demo
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <div class="stat-number"><span class="counter" data-target="10000">0</span>+</div>
+                        <div class="stat-label">Active Users</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number"><span class="counter" data-target="99">0</span>%</div>
+                        <div class="stat-label">Satisfaction Rate</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">$<span class="counter" data-target="2">0</span>M</div>
+                        <div class="stat-label">Cost Saved</div>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="dashboard-preview">
+                    <div class="dashboard-header">
+                        <div class="window-controls">
+                            <span></span><span></span><span></span>
+                        </div>
+                    </div>
+                    <div class="dashboard-content">
+                        <div class="chart-container animated-chart"></div>
+                        <div class="data-cards">
+                            <div class="data-card">
+                                <i class="fas fa-box"></i>
+                                <span class="card-value">+24%</span>
+                            </div>
+                            <div class="data-card">
+                                <i class="fas fa-chart-line"></i>
+                                <span class="card-value">↑ 2.4k</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="floating-elements">
+                    <div class="float-card card-1">
+                        <i class="fas fa-check-circle"></i>
+                        Stock Optimized
+                    </div>
+                    <div class="float-card card-2">
+                        <i class="fas fa-chart-pie"></i>
+                        Real-time Analytics
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Powerful Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header">
+                <h2>Powerful Features</h2>
+                <p>Everything you need to manage your inventory efficiently</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3>AI Predictions</h3>
+                    <p>Smart forecasting for optimal stock levels</p>
+                    <div class="feature-stats">
+                        <div class="stat">
+                            <span class="stat-number">95%</span>
+                            <span class="stat-label">Accuracy</span>
+                        </div>
+                    </div>
+                    <div class="feature-hover">
+                        <ul>
+                            <li><i class="fas fa-check"></i> Machine Learning</li>
+                            <li><i class="fas fa-check"></i> Real-time Updates</li>
+                            <li><i class="fas fa-check"></i> Smart Alerts</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Analytics Dashboard</h3>
+                    <p>Comprehensive insights at your fingertips</p>
+                    <div class="feature-stats">
+                        <div class="stat">
+                            <span class="stat-number">360°</span>
+                            <span class="stat-label">View</span>
+                        </div>
+                    </div>
+                    <div class="feature-hover">
+                        <ul>
+                            <li><i class="fas fa-check"></i> Custom Reports</li>
+                            <li><i class="fas fa-check"></i> Visual Charts</li>
+                            <li><i class="fas fa-check"></i> Export Options</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-sync"></i>
+                    </div>
+                    <h3>Auto Reordering</h3>
+                    <p>Never run out of stock again</p>
+                    <div class="feature-stats">
+                        <div class="stat">
+                            <span class="stat-number">24/7</span>
+                            <span class="stat-label">Monitoring</span>
+                        </div>
+                    </div>
+                    <div class="feature-hover">
+                        <ul>
+                            <li><i class="fas fa-check"></i> Smart Triggers</li>
+                            <li><i class="fas fa-check"></i> Vendor Integration</li>
+                            <li><i class="fas fa-check"></i> Order History</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Integration Logos Section -->
+    <div class="integration-section">
+        <div class="container">
+            <div class="integration-logos">
+                <div class="logo-item">
+                    <img src="{{ url_for('static', filename='images/quickbooks-logo.svg') }}" alt="QuickBooks">
+                    <span>QuickBooks</span>
+                </div>
+                <div class="logo-item">
+                    <img src="{{ url_for('static', filename='images/xero-logo.svg') }}" alt="Xero">
+                    <span>Xero</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reviews Section -->
+    <section class="reviews" id="reviews">
+        <div class="container">
+            <div class="section-header">
+                <h2>Loved by Businesses</h2>
+                <p>See what our customers have to say about JellyStock</p>
+            </div>
+            <div class="reviews-grid">
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="reviewer">
+                            <div class="avatar">
+                                <img src="{{ url_for('static', filename='images/avatar-1.jpg') }}" alt="Sarah Johnson">
+                            </div>
+                            <div class="reviewer-info">
+                                <h4>Sarah Johnson</h4>
+                                <p>Retail Manager</p>
+                            </div>
+                        </div>
+                        <div class="rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="review-text">"JellyStock transformed our inventory management. The AI predictions are spot-on, and we've reduced stockouts by 85%."</p>
+                    <div class="review-meta">
+                        <span class="company">TechRetail Inc.</span>
+                        <span class="verified"><i class="fas fa-check-circle"></i> Verified</span>
+                    </div>
+                </div>
+                
+                <div class="review-card featured">
+                    <div class="review-badge">Featured Review</div>
+                    <div class="review-header">
+                        <div class="reviewer">
+                            <div class="avatar">
+                                <img src="{{ url_for('static', filename='images/avatar-2.jpg') }}" alt="Michael Chen">
+                            </div>
+                            <div class="reviewer-info">
+                                <h4>Michael Chen</h4>
+                                <p>Operations Director</p>
+                            </div>
+                        </div>
+                        <div class="rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="review-text">"The dashboard is intuitive, and the automation features save us countless hours. Best investment we've made for our inventory management."</p>
+                    <div class="review-meta">
+                        <span class="company">Global Logistics Co.</span>
+                        <span class="verified"><i class="fas fa-check-circle"></i> Verified</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Section -->
+    <section class="benefits" id="benefits">
+        <div class="container">
+            <div class="benefits-grid">
+                <div class="benefits-content">
+                    <h2>Why Choose JellyStock?</h2>
+                    <p class="section-subtitle">Transform your inventory management</p>
+                    <div class="benefits-list">
+                        <div class="benefit-item">
+                            <div class="benefit-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="benefit-details">
+                                <h3>Boost Efficiency</h3>
+                                <p>Streamline your inventory management and save valuable time</p>
+                                <ul class="benefit-points">
+                                    <li><i class="fas fa-check"></i> Automated reordering</li>
+                                    <li><i class="fas fa-check"></i> Real-time tracking</li>
+                                    <li><i class="fas fa-check"></i> Smart notifications</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="benefit-stats">
+                            <div class="stat-item">
+                                <span class="stat-number">85%</span>
+                                <span class="stat-label">Time Saved</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">50%</span>
+                                <span class="stat-label">Cost Reduction</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="benefits-image">
+                    <img src="{{ url_for('static', filename='images/why-choose.svg') }}" 
+                         alt="Why Choose JellyStock"
+                         class="floating-image">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboard Preview Section -->
+    <section class="dashboard-preview">
+        <div class="container">
+            <div class="preview-content">
+                <h2>Powerful Dashboard</h2>
+                <p>Get real-time insights into your inventory</p>
+            </div>
+            <div class="preview-window">
+                <div class="preview-header">
+                    <div class="preview-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+                <div class="preview-body">
+                    <img src="{{ url_for('static', filename='images/dashboard-preview.svg') }}" 
+                         alt="JellyStock Dashboard"
+                         class="dashboard-image">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing" id="pricing">
+        <div class="container">
+            <div class="section-header text-center">
+                <h2>Simple Pricing Plans</h2>
+                <p>Choose the plan that fits your needs</p>
+            </div>
+            
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <h3>Free Plan</h3>
+                        <div class="price">
+                            <span class="currency">$</span>
+                            <span class="amount">0</span>
+                            <span class="period">/month</span>
+                        </div>
+                    </div>
+                    <div class="pricing-features">
+                        <ul>
+                            <li><i class="fas fa-check"></i> Up to 100 items</li>
+                            <li><i class="fas fa-check"></i> Basic analytics</li>
+                            <li><i class="fas fa-check"></i> Email support</li>
+                            <li><i class="fas fa-check"></i> Mobile app access</li>
+                        </ul>
+                    </div>
+                    <div class="pricing-action">
+                        <button class="btn btn-primary">Get Started</button>
+                    </div>
+                </div>
+
+                <div class="pricing-card pro">
+                    <div class="pricing-badge">Popular</div>
+                    <div class="pricing-header">
+                        <h3>Pro Plan</h3>
+                        <div class="price">
+                            <span class="currency">$</span>
+                            <span class="amount">29</span>
+                            <span class="period">/month</span>
+                        </div>
+                    </div>
+                    <div class="pricing-features">
+                        <ul>
+                            <li><i class="fas fa-check"></i> Unlimited items</li>
+                            <li><i class="fas fa-check"></i> Advanced analytics</li>
+                            <li><i class="fas fa-check"></i> Priority support</li>
+                            <li><i class="fas fa-check"></i> API access</li>
+                            <li><i class="fas fa-check"></i> Custom integrations</li>
+                            <li><i class="fas fa-check"></i> Team collaboration</li>
+                        </ul>
+                    </div>
+                    <div class="pricing-action">
+                        <button class="btn btn-primary">Upgrade Now</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <script>
+        // Mobile menu toggle
+        document.querySelector('.mobile-menu-btn').addEventListener('click', function() {
+            document.querySelector('.nav-links').classList.toggle('active');
+        });
+
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Counter Animation
+        const counters = document.querySelectorAll('.counter');
+        counters.forEach(counter => {
+            const target = parseInt(counter.getAttribute('data-target'));
+            const duration = 2000; // 2 seconds
+            const increment = target / (duration / 16); // 60fps
+            
+            let current = 0;
+            const updateCounter = () => {
+                current += increment;
+                if (current < target) {
+                    counter.textContent = Math.floor(current);
+                    requestAnimationFrame(updateCounter);
+                } else {
+                    counter.textContent = target;
+                }
+            };
+            
+            updateCounter();
+        });
+    </script>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html> 
+{% endblock %}
+    

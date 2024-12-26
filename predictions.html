@@ -1,0 +1,184 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="predictions-container">
+    <div class="container">
+        <!-- Header Section -->
+        <div class="predictions-header">
+            <h2><i class="fas fa-brain"></i> Inventory Predictions</h2>
+            <p>AI-powered insights for optimizing your inventory</p>
+        </div>
+
+        <!-- Key Metrics Cards -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="metric-content">
+                    <h3>Predicted Sales</h3>
+                    <p class="metric-value">{{ predictions.sales_forecast[0]|round|int }}</p>
+                    <p class="metric-label">units next 7 days</p>
+                </div>
+            </div>
+
+            <div class="metric-card {{ 'alert' if predictions.stockout_probability > 0.3 }}">
+                <div class="metric-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="metric-content">
+                    <h3>Stockout Risk</h3>
+                    <p class="metric-value">{{ (predictions.stockout_probability * 100)|round|int }}%</p>
+                    <p class="metric-label">probability</p>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="fas fa-boxes"></i>
+                </div>
+                <div class="metric-content">
+                    <h3>Optimal Order</h3>
+                    <p class="metric-value">{{ predictions.optimal_order_quantity|round|int }}</p>
+                    <p class="metric-label">units</p>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="metric-content">
+                    <h3>Reorder Point</h3>
+                    <p class="metric-value">{{ predictions.reorder_point|round|int }}</p>
+                    <p class="metric-label">units</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-grid">
+            <!-- Sales Forecast Chart -->
+            <div class="chart-card">
+                <h3>Sales Forecast</h3>
+                <canvas id="salesForecastChart"></canvas>
+            </div>
+
+            <!-- Stock Projection Chart -->
+            <div class="chart-card">
+                <h3>Stock Projection</h3>
+                <canvas id="stockProjectionChart"></canvas>
+            </div>
+
+            <!-- Demand Pattern Analysis -->
+            <div class="chart-card">
+                <h3>Demand Pattern</h3>
+                <div class="demand-pattern-info">
+                    <div class="pattern-type">
+                        <span class="label">Pattern:</span>
+                        <span class="value">{{ predictions.demand_pattern.pattern_type }}</span>
+                    </div>
+                    <div class="pattern-confidence">
+                        <span class="label">Confidence:</span>
+                        <span class="value">{{ (predictions.demand_pattern.confidence * 100)|round|int }}%</span>
+                    </div>
+                </div>
+                <canvas id="demandPatternChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Recommendations Section -->
+        <div class="recommendations-section">
+            <h3><i class="fas fa-lightbulb"></i> Recommendations</h3>
+            <div class="recommendations-grid">
+                {% for rec in predictions.recommendations %}
+                <div class="recommendation-card {{ rec.type }}">
+                    <div class="rec-icon">
+                        {% if rec.type == 'urgent' %}
+                            <i class="fas fa-exclamation-circle"></i>
+                        {% elif rec.type == 'warning' %}
+                            <i class="fas fa-exclamation-triangle"></i>
+                        {% else %}
+                            <i class="fas fa-info-circle"></i>
+                        {% endif %}
+                    </div>
+                    <div class="rec-content">
+                        <h4>{{ rec.message }}</h4>
+                        <p>{{ rec.reason }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const predictions = {{ predictions|tojson|safe }};
+    
+    // Sales Forecast Chart
+    new Chart(document.getElementById('salesForecastChart').getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: predictions.dates,
+            datasets: [{
+                label: 'Predicted Sales',
+                data: predictions.sales_forecast,
+                borderColor: '#0066cc',
+                fill: false
+            }, {
+                label: 'Confidence Interval',
+                data: predictions.confidence_intervals.upper,
+                borderColor: 'rgba(0, 102, 204, 0.2)',
+                backgroundColor: 'rgba(0, 102, 204, 0.1)',
+                fill: '+1'
+            }, {
+                data: predictions.confidence_intervals.lower,
+                borderColor: 'rgba(0, 102, 204, 0.2)',
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: '7-Day Sales Forecast'
+                }
+            }
+        }
+    });
+
+    // Stock Projection Chart
+    new Chart(document.getElementById('stockProjectionChart').getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: predictions.dates,
+            datasets: [{
+                label: 'Projected Stock',
+                data: predictions.stock_projection,
+                borderColor: '#00cc66',
+                fill: false
+            }, {
+                label: 'Reorder Point',
+                data: Array(predictions.dates.length).fill(predictions.reorder_point),
+                borderColor: '#ff6b6b',
+                borderDash: [5, 5],
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Stock Level Projection'
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %} 

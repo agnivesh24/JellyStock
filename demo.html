@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inventory Prediction Demo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="demo-container">
+        <div class="demo-header">
+            <h1>Inventory Prediction Demo</h1>
+            <a href="{{ url_for('index') }}" class="btn btn-outline">Back to Home</a>
+        </div>
+        
+        <div class="demo-content">
+            <form id="demoForm">
+                <div class="form-group">
+                    <label for="storeName">Store Name</label>
+                    <input type="text" id="storeName" required>
+                </div>
+                
+                <div id="inventoryList">
+                    <div class="inventory-item">
+                        <select class="item-type" required>
+                            <option value="">Select Type</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Accessories">Accessories</option>
+                            <option value="Peripherals">Peripherals</option>
+                            <option value="Components">Components</option>
+                        </select>
+                        <select class="item-name" required>
+                            <option value="">Select Item</option>
+                            <option value="Laptop">Laptop</option>
+                            <option value="Smartphone">Smartphone</option>
+                            <option value="Tablet">Tablet</option>
+                            <option value="Headphones">Headphones</option>
+                            <option value="Monitor">Monitor</option>
+                            <option value="Keyboard">Keyboard</option>
+                            <option value="Mouse">Mouse</option>
+                        </select>
+                        <input type="number" placeholder="Current stock" required>
+                        <input type="number" placeholder="Price" required>
+                        <div class="monthly-sales">
+                            <h4>Last 12 Months Sales</h4>
+                            <div class="sales-inputs">
+                                <input type="number" placeholder="Jan" required>
+                                <input type="number" placeholder="Feb" required>
+                                <input type="number" placeholder="Mar" required>
+                                <input type="number" placeholder="Apr" required>
+                                <input type="number" placeholder="May" required>
+                                <input type="number" placeholder="Jun" required>
+                                <input type="number" placeholder="Jul" required>
+                                <input type="number" placeholder="Aug" required>
+                                <input type="number" placeholder="Sep" required>
+                                <input type="number" placeholder="Oct" required>
+                                <input type="number" placeholder="Nov" required>
+                                <input type="number" placeholder="Dec" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" id="addItem" class="btn btn-secondary">
+                        <i class="fas fa-plus"></i> Add Item
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-magic"></i> Predict Stock
+                    </button>
+                </div>
+            </form>
+
+            <div id="predictionResults" class="prediction-results" style="display: none;">
+                <h2>Prediction Results</h2>
+                <div class="results-grid"></div>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/demo.js') }}"></script>
+</body>
+</html> 

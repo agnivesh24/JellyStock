@@ -1,0 +1,138 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="form-container animate-fade-in">
+    <div class="form-header">
+        <h2><i class="fas fa-plus-circle"></i> Add New Item</h2>
+        <p>Enter the details of the new inventory item</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} animate-fade-in">
+                    <i class="fas fa-info-circle"></i>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" class="item-form">
+        <div class="form-group">
+            <label for="name" class="form-label">
+                <i class="fas fa-tag"></i> Item Name
+            </label>
+            <input type="text" 
+                   id="name" 
+                   name="name" 
+                   class="form-input" 
+                   required 
+                   placeholder="Enter item name">
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="category" class="form-label">
+                    <i class="fas fa-folder"></i> Category
+                </label>
+                <select id="category" name="category" class="form-input" required>
+                    <option value="">Select Category</option>
+                    <option value="electronics">Electronics</option>
+                    <option value="clothing">Clothing</option>
+                    <option value="food">Food & Beverages</option>
+                    <option value="office">Office Supplies</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="supplier" class="form-label">
+                    <i class="fas fa-truck"></i> Supplier
+                </label>
+                <input type="text" 
+                       id="supplier" 
+                       name="supplier" 
+                       class="form-input" 
+                       required 
+                       placeholder="Enter supplier name">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="quantity" class="form-label">
+                    <i class="fas fa-boxes"></i> Quantity
+                </label>
+                <input type="number" 
+                       id="quantity" 
+                       name="quantity" 
+                       class="form-input" 
+                       required 
+                       min="0" 
+                       placeholder="Enter quantity">
+            </div>
+
+            <div class="form-group">
+                <label for="price" class="form-label">
+                    <i class="fas fa-dollar-sign"></i> Price
+                </label>
+                <input type="number" 
+                       id="price" 
+                       name="price" 
+                       class="form-input" 
+                       required 
+                       min="0" 
+                       step="0.01" 
+                       placeholder="Enter price">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="reorder_level" class="form-label">
+                    <i class="fas fa-level-down-alt"></i> Reorder Level
+                </label>
+                <input type="number" 
+                       id="reorder_level" 
+                       name="reorder_level" 
+                       class="form-input" 
+                       required 
+                       min="0" 
+                       placeholder="Enter reorder level">
+            </div>
+
+            <div class="form-group">
+                <label for="location" class="form-label">
+                    <i class="fas fa-map-marker-alt"></i> Storage Location
+                </label>
+                <input type="text" 
+                       id="location" 
+                       name="location" 
+                       class="form-input" 
+                       placeholder="Enter storage location">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="description" class="form-label">
+                <i class="fas fa-align-left"></i> Description
+            </label>
+            <textarea id="description" 
+                      name="description" 
+                      class="form-input" 
+                      rows="3" 
+                      placeholder="Enter item description"></textarea>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Item
+            </button>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %} 

@@ -1,0 +1,351 @@
+{% extends "index.html" %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="container">
+        <div class="dashboard-header animate-fade-in">
+            <div>
+                <h2><i class="fas fa-chart-line"></i> Dashboard</h2>
+                <p>Overview of your inventory status</p>
+            </div>
+            <a href="{{ url_for('add_item') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add New Item
+            </a>
+        </div>
+
+        <div class="stats-grid animate-fade-in">
+            <div class="stat-card">
+                <div class="stat-value">{{ items|length }}</div>
+                <div class="stat-label">Total Items</div>
+                <div class="stat-icon"><i class="fas fa-boxes"></i></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ low_stock|length }}</div>
+                <div class="stat-label">Low Stock Items</div>
+                <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">${{ total_value }}</div>
+                <div class="stat-label">Total Inventory Value</div>
+                <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
+            </div>
+        </div>
+
+        <div class="stock-overview-section animate-fade-in">
+            <div class="section-header">
+                <h2><i class="fas fa-boxes"></i> Stock Levels</h2>
+                <div class="header-actions">
+                    <button class="btn btn-outline" onclick="toggleView('grid')">
+                        <i class="fas fa-th-large"></i>
+                    </button>
+                    <button class="btn btn-outline" onclick="toggleView('table')">
+                        <i class="fas fa-list"></i>
+                    </button>
+                    <select class="form-select" id="categoryFilter">
+                        <option value="all">All Categories</option>
+                        {% for category in stock_data.categories %}
+                        <option value="{{ category }}">{{ category }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="stock-stats-grid">
+                <div class="stat-box">
+                    <div class="stat-icon">
+                        <i class="fas fa-cubes"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Total Items</h3>
+                        <p>{{ items|length }}</p>
+                    </div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-icon warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Low Stock Items</h3>
+                        <p>{{ low_stock|length }}</p>
+                    </div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-icon success">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Total Value</h3>
+                        <p>${{ "%.2f"|format(total_value) }}</p>
+                    </div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-icon info">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Categories</h3>
+                        <p>{{ stock_data.categories|length }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stock-grid view-mode" id="stockGrid">
+                {% for item in items %}
+                <div class="stock-card" data-category="{{ item.category }}">
+                    <div class="stock-card-header">
+                        <h3>{{ item.name }}</h3>
+                        <span class="category-badge">{{ item.category }}</span>
+                    </div>
+                    <div class="stock-card-body">
+                        <div class="stock-level-indicator">
+                            <div class="progress-bar">
+                                <div class="progress" style="width: {{ (item.quantity / (item.reorder_level * 2) * 100)|round }}%"></div>
+                            </div>
+                            <span class="stock-quantity">{{ item.quantity }} units</span>
+                        </div>
+                        <div class="stock-details">
+                            <div class="detail-item">
+                                <span class="label">Reorder Level:</span>
+                                <span class="value">{{ item.reorder_level }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Price:</span>
+                                <span class="value">${{ "%.2f"|format(item.price) }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Value:</span>
+                                <span class="value">${{ "%.2f"|format(item.quantity * item.price) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stock-card-footer">
+                        <button class="btn btn-sm btn-outline" onclick="location.href='{{ url_for('predictions', item_id=item.id) }}'">
+                            <i class="fas fa-brain"></i> Predict
+                        </button>
+                        <button class="btn btn-sm btn-primary" onclick="openUpdateModal({{ item|tojson }})">
+                            <i class="fas fa-edit"></i> Update
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Stock Level Overview Section -->
+        <div class="dashboard-grid">
+            <div class="chart-card animate-fade-in">
+                <h3><i class="fas fa-chart-bar"></i> Stock Level Overview</h3>
+                <div class="chart-container">
+                    <canvas id="stockLevelChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="chart-card animate-fade-in">
+                <h3><i class="fas fa-chart-pie"></i> Category Distribution</h3>
+                <div class="chart-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Analysis -->
+        <div class="category-analysis animate-fade-in">
+            <h3><i class="fas fa-tags"></i> Category Analysis</h3>
+            <div class="category-grid">
+                {% for category, data in category_data.items() %}
+                <div class="category-card">
+                    <h4>{{ category }}</h4>
+                    <div class="category-stats">
+                        <div class="stat">
+                            <span class="label">Items</span>
+                            <span class="value">{{ data.item_count }}</span>
+                        </div>
+                        <div class="stat">
+                            <span class="label">Total Quantity</span>
+                            <span class="value">{{ data.total_quantity }}</span>
+                        </div>
+                        <div class="stat">
+                            <span class="label">Total Value</span>
+                            <span class="value">${{ "%.2f"|format(data.total_value) }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add this before the closing body tag -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Stock Level Chart
+    const stockCtx = document.getElementById('stockLevelChart').getContext('2d');
+    const stockData = {{ stock_data|tojson }};
+    
+    new Chart(stockCtx, {
+        type: 'bar',
+        data: {
+            labels: stockData.labels,
+            datasets: [
+                {
+                    label: 'Current Stock',
+                    data: stockData.quantities,
+                    backgroundColor: 'rgba(0, 102, 204, 0.6)',
+                    borderColor: 'rgba(0, 102, 204, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Reorder Level',
+                    data: stockData.reorder_levels,
+                    type: 'line',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderDash: [5, 5],
+                    fill: false
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Stock Levels vs Reorder Points'
+                },
+                legend: {
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Quantity'
+                    }
+                },
+                x: {
+                    ticks: {
+                        maxRotation: 45,
+                        minRotation: 45
+                    }
+                }
+            }
+        }
+    });
+
+    // Category Distribution Chart
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    const categoryData = {{ category_data|tojson }};
+    
+    new Chart(categoryCtx, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(categoryData),
+            datasets: [{
+                data: Object.values(categoryData).map(d => d.total_quantity),
+                backgroundColor: [
+                    'rgba(0, 102, 204, 0.6)',
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Stock Distribution by Category'
+                },
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+});
+
+function toggleView(mode) {
+    const stockGrid = document.getElementById('stockGrid');
+    if (mode === 'grid') {
+        stockGrid.classList.add('view-mode');
+        stockGrid.classList.remove('table-mode');
+    } else {
+        stockGrid.classList.remove('view-mode');
+        stockGrid.classList.add('table-mode');
+    }
+}
+
+document.getElementById('categoryFilter').addEventListener('change', function() {
+    const category = this.value;
+    const cards = document.querySelectorAll('.stock-card');
+    
+    cards.forEach(card => {
+        if (category === 'all' || card.dataset.category === category) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+});
+
+function openUpdateModal(item) {
+    document.getElementById('updateModal').style.display = 'flex';
+    document.getElementById('itemId').value = item.id;
+    document.getElementById('itemName').value = item.name;
+    document.getElementById('itemQuantity').value = item.quantity;
+    document.getElementById('itemCategory').value = item.category;
+    document.getElementById('itemPrice').value = item.price;
+    document.getElementById('itemSupplier').value = item.supplier;
+    document.getElementById('itemReorderLevel').value = item.reorder_level;
+}
+
+function closeModal() {
+    document.getElementById('updateModal').style.display = 'none';
+}
+
+async function handleUpdate(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    const itemId = formData.get('itemId');
+
+    try {
+        const response = await fetch(`/update_item/${itemId}`, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            if (result.success) {
+                closeModal();
+                location.reload(); // Refresh the page to show updated data
+            } else {
+                alert('Error updating item: ' + result.message);
+            }
+        } else {
+            alert('Error updating item. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error updating item. Please try again.');
+    }
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('updateModal');
+    if (event.target === modal) {
+        closeModal();
+    }
+}
+</script>
+{% endblock %} 
